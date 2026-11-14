@@ -1,0 +1,36 @@
+
+module fog_removal #(
+    parameter DATA_WIDTH = 8
+)(
+    input wire [DATA_WIDTH-1:0] orig_pixel,
+    input wire [DATA_WIDTH-1:0] smooth_pixel,
+    output reg [DATA_WIDTH-1:0] enhanced_pixel
+);
+
+    reg signed [9:0] detail;
+    reg signed [10:0] enhanced;
+
+    always @(*) begin
+
+        detail =
+            $signed({1'b0, orig_pixel}) -
+            $signed({1'b0, smooth_pixel});
+
+        // Local detail enhancement
+        enhanced =
+            $signed({1'b0, orig_pixel}) +
+            (detail >>> 1);
+
+        // Saturation
+        if (enhanced < 0)
+            enhanced_pixel = 0;
+
+        else if (enhanced > 255)
+            enhanced_pixel = 255;
+
+        else
+            enhanced_pixel = enhanced[7:0];
+
+    end
+
+endmodule
